@@ -1,0 +1,386 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SUPER_ADMIN
+  VIEWER_ADMIN
+  USER_FIZ
+  USER_YUR
+}
+
+enum StatusType {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum MeasureType {
+  DAY
+  HOUR
+}
+
+model Region {
+  id        String   @id @default(uuid())
+  name_uz   String
+  name_ru   String?
+  name_en   String?
+  users     User[]
+  createdAt DateTime @default(now())
+}
+
+model VerifyEmail {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id         String       @id @default(uuid())
+  firstName  String
+  lastName   String
+  password   String
+  email      String       @unique
+  phone      String
+  role       UserRole
+  regionId   String
+  resetToken String?
+  Region     Region       @relation(fields: [regionId], references: [id])
+  createdAt  DateTime     @default(now())
+  Session    Session[]
+  Order      Order[]
+  Comment    Comment[]
+  Star       Star[]
+  BasketItem BasketItem[]
+  User_YUR   User_YUR[]
+}
+
+model User_YUR {
+  id        String   @id @default(uuid())
+  INN       String
+  R_S       String
+  Address   String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  Bank      String?
+  MFO       String?
+  userId    String
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  deviceInfo String
+  ipAddress  String
+  createdAt  DateTime @default(now())
+}
+
+model Tool {
+  id               String             @id @default(uuid())
+  name_uz          String
+  name_ru          String?
+  name_en          String?
+  description_uz   String
+  description_ru   String?
+  description_en   String?
+  code             String
+  price            Float
+  quantity         Int
+  isActive         Boolean            @default(true)
+  brand            Brand?             @relation(fields: [brandId], references: [id])
+  brandId          String
+  capacity         Capacity?          @relation(fields: [capacityId], references: [id])
+  capacityId       String
+  size             Size               @relation(fields: [sizeId], references: [id])
+  sizeId           String
+  image            String?
+  ProductTool      ProductTool[]
+  // OrderTool        OrderTool[]
+  OrderProductTool OrderProductTool[]
+  createdAt        DateTime           @default(now())
+  BasketItem       BasketItem[]
+}
+
+model Brand {
+  id        String   @id @default(uuid())
+  name_uz   String
+  name_ru   String?
+  name_en   String?
+  Tool      Tool[]
+  createdAt DateTime @default(now())
+}
+
+model Capacity {
+  id        String   @id @default(uuid())
+  name_uz   String
+  name_ru   String?
+  name_en   String?
+  Tool      Tool[]
+  createdAt DateTime @default(now())
+}
+
+model Size {
+  id        String   @id @default(uuid())
+  name_uz   String
+  name_ru   String?
+  name_en   String?
+  Tool      Tool[]
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id              String          @id @default(uuid())
+  name_uz         String
+  name_ru         String?
+  name_en         String?
+  image           String?
+  isActive        Boolean         @default(true)
+  minWorkingHours Int
+  ProductLevel    ProductLevel[]
+  ProductMaster   ProductMaster[]
+  ProductTool     ProductTool[]
+  OrderProduct    OrderProduct[]
+  BasketItem      BasketItem[]
+  createdAt       DateTime        @default(now())
+}
+
+model ProductLevel {
+  id              String   @id @default(uuid())
+  product         Product  @relation(fields: [productId], references: [id])
+  productId       String
+  level           Level    @relation(fields: [levelId], references: [id])
+  levelId         String
+  minWorkingHours Int?
+  price_hourly    Float?
+  price_daily     Float?
+  createdAt       DateTime @default(now())
+}
+
+model ProductTool {
+  id        String   @id @default(ulid())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  tool      Tool     @relation(fields: [toolId], references: [id])
+  toolId    String
+  createdAt DateTime @default(now())
+}
+
+model Level {
+  id            String          @id @default(uuid())
+  name_uz       String
+  name_ru       String?
+  name_en       String?
+  ProductLevel  ProductLevel[]
+  OrderProduct  OrderProduct[]
+  BasketItem    BasketItem[]
+  createdAt     DateTime        @default(now())
+  ProductMaster ProductMaster[]
+}
+
+model Star {
+  id       String @id @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  master   Master @relation(fields: [masterId], references: [id])
+  masterId String
+  star     Float
+}
+
+model Master {
+  id            String          @id @default(uuid())
+  fullName      String
+  phone         String
+  isActive      Boolean         @default(true)
+  year          Int
+  image         String?
+  passportImage String?
+  about         String?
+  ProductMaster ProductMaster[]
+  OrderMaster   OrderMaster[]
+  CommentMaster CommentMaster[]
+  createdAt     DateTime        @default(now())
+  Star          Star[]
+}
+
+model ProductMaster {
+  id              String   @id @default(uuid())
+  product         Product  @relation(fields: [productId], references: [id])
+  productId       String
+  master          Master   @relation(fields: [masterId], references: [id])
+  masterId        String
+  level           Level    @relation(fields: [levelId], references: [id])
+  levelId         String
+  minWorkingHours Int
+  price_hourly    Float
+  price_daily     Float
+  experience      Float
+  createdAt       DateTime @default(now())
+}
+
+enum PayType {
+  CASH
+  CARD
+}
+
+model Order {
+  id                String         @id @default(uuid())
+  user              User           @relation(fields: [userId], references: [id])
+  userId            String
+  total             Float
+  address           String
+  location          Json?
+  date              DateTime
+  payType           String
+  withDelivery      Boolean
+  status            StatusType
+  commentToDelivery String?
+  OrderProduct      OrderProduct[]
+  // OrderTool         OrderTool[]
+  OrderMaster       OrderMaster[]
+  Comment           Comment[]
+  createdAt         DateTime       @default(now())
+}
+
+model OrderMaster {
+  id        String   @id @default(uuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  master    Master   @relation(fields: [masterId], references: [id])
+  masterId  String
+  createdAt DateTime @default(now())
+}
+
+model OrderProduct {
+  id               String             @id @default(uuid())
+  order            Order              @relation(fields: [orderId], references: [id])
+  orderId          String
+  product          Product            @relation(fields: [productId], references: [id])
+  productId        String
+  level            Level              @relation(fields: [levelId], references: [id])
+  levelId          String
+  count            Int
+  quantity         Int
+  measure          MeasureType
+  OrderProductTool OrderProductTool[]
+  createdAt        DateTime           @default(now())
+}
+
+model OrderProductTool {
+  id             String       @id @default(uuid())
+  orderProduct   OrderProduct @relation(fields: [orderProductId], references: [id])
+  orderProductId String
+  tool           Tool         @relation(fields: [toolId], references: [id])
+  toolId         String
+  count          Int
+  createdAt      DateTime     @default(now())
+}
+
+// model OrderTool {
+//   id        String   @id @default(uuid())
+//   order     Order    @relation(fields: [orderId], references: [id])
+//   orderId   String
+//   tool      Tool     @relation(fields: [toolId], references: [id])
+//   toolId    String
+//   count     Int
+//   createdAt DateTime @default(now())
+// }
+
+model Comment {
+  id            String          @id @default(uuid())
+  user          User            @relation(fields: [userId], references: [id])
+  userId        String
+  order         Order           @relation(fields: [orderId], references: [id])
+  orderId       String
+  message       String
+  CommentMaster CommentMaster[]
+  createdAt     DateTime        @default(now())
+}
+
+model CommentMaster {
+  id        String   @id @default(uuid())
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  commentId String
+  master    Master   @relation(fields: [masterId], references: [id])
+  masterId  String
+  star      Float
+  createdAt DateTime @default(now())
+}
+
+model GeneralInfo {
+  id        String   @id @default(uuid())
+  email     String
+  links     Json
+  phones    Json
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  userName  String
+  sureName  String
+  phone     String
+  address   String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model FAQ {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+}
+
+model BasketItem {
+  id        String      @id @default(uuid())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  productId String
+  levelId   String
+  toolId    String
+  measure   MeasureType
+  count     Int
+  quantity  Int
+  total     Int
+
+  product   Product  @relation(fields: [productId], references: [id])
+  level     Level    @relation(fields: [levelId], references: [id])
+  tool      Tool     @relation(fields: [toolId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Showcase {
+  id             String   @id @default(uuid())
+  name_uz        String
+  name_ru        String?
+  name_en        String?
+  description_uz String
+  description_ru String?
+  description_en String?
+  image          String
+  link           String
+  createdAt      DateTime @default(now())
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  name_uz   String
+  name_ru   String?
+  name_en   String?
+  image     String
+  createdAt DateTime @default(now())
+}

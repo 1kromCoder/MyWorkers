@@ -1,0 +1,86 @@
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { CreateLevelDto } from './dto/create-level.dto';
+import { UpdateLevelDto } from './dto/update-level.dto';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
+export class LevelService {
+  constructor(private readonly prisma: PrismaService) {}
+  async create(data: CreateLevelDto) {
+    try {
+      let post = await this.prisma.level.create({ data });
+      return post;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findAll(params: {
+    name?: string;
+    page?: number | string;
+    limit?: number | string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const page = parseInt(params.page as string) || 1;
+    const limit = parseInt(params.limit as string) || 10;
+    const sortOrder = params.sortOrder || 'asc';
+    const name = params.name;
+
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.LevelWhereInput = name
+      ? { name_uz: { contains: name, mode: 'insensitive' } }
+      : {};
+
+    const [levels, total] = await Promise.all([
+      this.prisma.level.findMany({
+        where,
+        orderBy: { name_uz: sortOrder },
+        skip,
+        take: limit,
+      }),
+      this.prisma.level.count({ where }),
+    ]);
+
+    return {
+      data: levels,
+      meta: {
+        total,
+        page,
+        limit,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
+  }
+  async findOne(id: string) {
+    try {
+      let one = await this.prisma.level.findFirst({ where: { id } });
+      return one;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+  }
+
+  async update(id: string, data: UpdateLevelDto) {
+    try {
+      let edit = await this.prisma.level.update({ where: { id }, data });
+      return edit;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      let del = await this.prisma.level.delete({ where: { id } });
+      return del;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+  }
+}
