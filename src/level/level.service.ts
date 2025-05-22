@@ -13,6 +13,13 @@ export class LevelService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateLevelDto) {
     try {
+      const existing = await this.prisma.level.findFirst({
+        where: { name_uz: data.name_uz },
+      });
+
+      if (existing) {
+        return { message: 'Bunday level mavjud' };
+      }
       let post = await this.prisma.level.create({ data });
       return post;
     } catch (error) {

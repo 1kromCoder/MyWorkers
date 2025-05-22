@@ -29,7 +29,13 @@ export class BasketService {
       if (!product)
         throw new NotFoundException(`Mahsulot topilmadi: ${productId}`);
       if (!level) throw new NotFoundException(`Level topilmadi: ${levelId}`);
+      const existing = await this.prisma.basketItem.findFirst({
+        where: { productId: data.productId },
+      });
 
+      if (existing) {
+        return { message: 'Bunday basket mavjud' };
+      }
       const basketItem = await this.prisma.basketItem.create({
         data: {
           userId,

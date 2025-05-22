@@ -25,6 +25,7 @@ import { FaqModule } from './faq/faq.module';
 import { ShowcaseModule } from './showcase/showcase.module';
 import { PartnerModule } from './partner/partner.module';
 import { BasketModule } from './basket/basket.module';
+import { TelegramModule } from './bot/bot.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { BasketModule } from './basket/basket.module';
     ShowcaseModule,
     PartnerModule,
     BasketModule,
+    TelegramModule,
   ],
   controllers: [AppController, MulterController],
   providers: [AppService],

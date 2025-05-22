@@ -13,6 +13,13 @@ export class CapacityService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateCapacityDto) {
     try {
+      const existing = await this.prisma.capacity.findFirst({
+        where: { name_uz: data.name_uz },
+      });
+
+      if (existing) {
+        return { message: 'Bunday capacity mavjud' };
+      }
       let post = await this.prisma.capacity.create({ data });
       return post;
     } catch (error) {

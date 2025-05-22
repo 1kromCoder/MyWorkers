@@ -22,6 +22,9 @@ import { Request as ExpressRequest } from 'express';
 import { RefreshTokenDto } from './dto/refresh-tok.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateAdmin } from './dto/admin.create.dto';
+import { RoleGuard } from 'src/auth/role.guards';
+import { RoleD } from './decoration/user.decoration';
+import { UserRole } from '@prisma/client';
 @Controller('user')
 export class UserController {
   constructor(
@@ -52,6 +55,8 @@ export class UserController {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     return this.userService.login(loginUserDto, req);
   }
+  // @RoleD(UserRole.ADMIN)
+  // @UseGuards(AuthGuard, RoleGuard)
   @Post('add-Admin')
   addAdmin(@Body() dto: CreateAdmin) {
     return this.userService.createAdmin(dto);

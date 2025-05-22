@@ -13,6 +13,13 @@ export class ShowcaseService {
 
   async create(dto: CreateShowcaseDto) {
     try {
+      const existing = await this.prisma.showcase.findUnique({
+        where: { link: dto.link },
+      });
+
+      if (existing) {
+        return { message: 'Bunday showcase mavjud' };
+      }
       return await this.prisma.showcase.create({
         data: {
           name_uz: dto.name_uz,

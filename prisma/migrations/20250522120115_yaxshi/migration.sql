@@ -39,11 +39,26 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
     "role" "UserRole" NOT NULL,
-    "regionId" TEXT NOT NULL,
+    "regionId" TEXT,
+    "tgId" TEXT NOT NULL,
     "resetToken" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "User_YUR" (
+    "id" TEXT NOT NULL,
+    "INN" TEXT NOT NULL,
+    "R_S" TEXT NOT NULL,
+    "Address" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "Bank" TEXT,
+    "MFO" TEXT,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "User_YUR_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -319,6 +334,8 @@ CREATE TABLE "BasketItem" (
     "count" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
     "total" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "BasketItem_pkey" PRIMARY KEY ("id")
 );
@@ -352,13 +369,31 @@ CREATE TABLE "Partner" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Region_name_uz_key" ON "Region"("name_uz");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "VerifyEmail_email_key" ON "VerifyEmail"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Master_phone_key" ON "Master"("phone");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "GeneralInfo_email_key" ON "GeneralInfo"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Contact_phone_key" ON "Contact"("phone");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Showcase_link_key" ON "Showcase"("link");
+
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_regionId_fkey" FOREIGN KEY ("regionId") REFERENCES "Region"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_regionId_fkey" FOREIGN KEY ("regionId") REFERENCES "Region"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "User_YUR" ADD CONSTRAINT "User_YUR_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

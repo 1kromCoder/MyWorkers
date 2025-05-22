@@ -3,6 +3,7 @@ import {
   IsArray,
   IsEmail,
   IsEnum,
+  IsOptional,
   IsPhoneNumber,
   IsString,
   ValidateNested,
@@ -34,9 +35,12 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiProperty()
   @IsString()
   regionId?: string;
-  @ApiProperty({ type: [CreateUserYurDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
+  @ApiProperty({ example: '12365452' })
+  @IsString()
+  tgId?: string;
+  @IsOptional()
+  @ApiProperty({ type: CreateUserYurDto })
+  @ValidateNested()
   @Type(() => CreateUserYurDto)
-  User_YUR?: CreateUserYurDto[];
+  User_YUR?: CreateUserYurDto;
 }

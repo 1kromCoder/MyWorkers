@@ -34,7 +34,7 @@ enum MeasureType {
 
 model Region {
   id        String   @id @default(uuid())
-  name_uz   String
+  name_uz   String   @unique
   name_ru   String?
   name_en   String?
   users     User[]
@@ -55,9 +55,10 @@ model User {
   email      String       @unique
   phone      String
   role       UserRole
-  regionId   String
+  regionId   String?
+  tgId       String?      @unique
   resetToken String?
-  Region     Region       @relation(fields: [regionId], references: [id])
+  Region     Region?      @relation(fields: [regionId], references: [id])
   createdAt  DateTime     @default(now())
   Session    Session[]
   Order      Order[]
@@ -202,7 +203,7 @@ model Star {
 model Master {
   id            String          @id @default(uuid())
   fullName      String
-  phone         String
+  phone         String          @unique
   isActive      Boolean         @default(true)
   year          Int
   image         String?
@@ -321,7 +322,7 @@ model CommentMaster {
 
 model GeneralInfo {
   id        String   @id @default(uuid())
-  email     String
+  email     String   @unique
   links     Json
   phones    Json
   createdAt DateTime @default(now())
@@ -331,7 +332,7 @@ model Contact {
   id        String   @id @default(uuid())
   userName  String
   sureName  String
-  phone     String
+  phone     String   @unique
   address   String
   message   String
   createdAt DateTime @default(now())
@@ -372,7 +373,7 @@ model Showcase {
   description_ru String?
   description_en String?
   image          String
-  link           String
+  link           String   @unique
   createdAt      DateTime @default(now())
 }
 

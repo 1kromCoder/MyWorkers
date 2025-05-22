@@ -13,6 +13,13 @@ export class RegionService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateRegionDto) {
     try {
+      const existing = await this.prisma.region.findUnique({
+        where: { name_uz: data.name_uz },
+      });
+
+      if (existing) {
+        return { message: 'Bunday region mavjud' };
+      }
       let post = await this.prisma.region.create({ data });
       return post;
     } catch (error) {

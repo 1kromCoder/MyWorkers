@@ -144,17 +144,14 @@ export class ProductService {
 
   async findAll(query: any) {
     try {
-      // Pagination va sort uchun default qiymatlar
       const page = query.page ? Number(query.page) : 1;
       const limit = query.limit ? Number(query.limit) : 10;
       const skip = (page - 1) * limit;
       const sortBy = query.sortBy || 'name_uz';
       const order = query.order === 'desc' ? 'desc' : 'asc';
 
-      // Filter obyektini shakllantiramiz
       const where: any = {};
 
-      // name_uz bo‘yicha qidiruv (partially)
       if (query.name_uz) {
         where.name_uz = { contains: query.name_uz, mode: 'insensitive' };
       }
@@ -166,7 +163,6 @@ export class ProductService {
       }
 
       if (query.isActive !== undefined) {
-        // string 'true' yoki 'false' bo'lishi mumkin, uni boolean ga o'gir
         if (query.isActive === 'true') where.isActive = true;
         else if (query.isActive === 'false') where.isActive = false;
       }
@@ -179,9 +175,7 @@ export class ProductService {
       }
 
       if (query.toolIds) {
-        // toolIds ni massivga aylantiramiz
         const toolIdsArray = (query.toolIds as string).split(',');
-        // Prisma relations bo'yicha filter (ProductTool relation modeli)
         where.ProductTool = {
           some: {
             toolId: { in: toolIdsArray },
@@ -189,8 +183,6 @@ export class ProductService {
         };
       }
 
-      // E'tibor bering: levelObjects bo'yicha filter qilish odatda qiyin,
-      // agar kerak bo'lsa alohida query yozish mumkin
 
       const products = await this.prisma.product.findMany({
         where,

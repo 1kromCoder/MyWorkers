@@ -8,6 +8,13 @@ export class ContactService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateContactDto) {
     try {
+      const existing = await this.prisma.contact.findUnique({
+        where: { phone: data.phone },
+      });
+
+      if (existing) {
+        return { message: 'Bunday contact mavjud' };
+      }
       let post = await this.prisma.contact.create({ data });
       return post;
     } catch (error) {

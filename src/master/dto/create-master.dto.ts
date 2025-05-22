@@ -4,6 +4,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsNumberString,
   IsOptional,
   IsPositive,
   IsString,
@@ -50,7 +51,7 @@ export class CreateMasterDto {
   fullName: string;
 
   @ApiProperty()
-  @IsString()
+  @IsNumberString()
   phone: string;
 
   @ApiProperty()

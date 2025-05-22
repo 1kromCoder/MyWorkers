@@ -14,6 +14,13 @@ export class BrandService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateBrandDto) {
     try {
+      const existing = await this.prisma.brand.findFirst({
+        where: { name_uz: data.name_uz },
+      });
+
+      if (existing) {
+        return { message: 'Bunday brand mavjud' };
+      }
       let post = await this.prisma.brand.create({ data });
       return post;
     } catch (error) {

@@ -27,6 +27,13 @@ export class MasterService {
     } = data;
 
     try {
+      const existing = await this.prisma.master.findUnique({
+        where: { phone: data.phone },
+      });
+
+      if (existing) {
+        return { message: 'Bunday master mavjud' };
+      }
       const master = await this.prisma.master.create({
         data: {
           fullName,
@@ -219,12 +226,21 @@ export class MasterService {
       if (!master) {
         throw new NotFoundException('Master not found');
       }
-      let avg = await this.prisma.star.aggregate({
+
+      const avg = await this.prisma.star.aggregate({
         where: { masterId: id },
         _avg: { star: true },
       });
 
-      return { ...master, averageStar: avg._avg ?? 0 };
+      const averageStar =
+        avg._avg.star !== null && avg._avg.star !== undefined
+          ? parseFloat(avg._avg.star.toFixed(1))
+          : 0;
+
+      return {
+        ...master,
+        averageStar,
+      };
     } catch (error) {
       throw error instanceof NotFoundException
         ? error
@@ -259,8 +275,20 @@ export class MasterService {
         throw new NotFoundException('Master not found');
       }
 
+      await this.prisma.productMaster.deleteMany({
+        where: { masterId: id },
+      });
+
+      await this.prisma.star.deleteMany({
+        where: { masterId: id },
+      });
+
       await this.prisma.master.delete({ where: { id } });
-      return { message: 'Master deleted successfully' };
+
+      return {
+        message: 'Master deleted successfully',
+        deletedMaster: existing,
+      };
     } catch (error) {
       console.error(`❌ Error deleting master with ID ${id}:`, error);
       throw error instanceof NotFoundException

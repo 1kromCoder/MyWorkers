@@ -12,6 +12,13 @@ export class GeneralinfoService {
   constructor(private readonly prisma: PrismaService) {}
   async create(dto: CreateGeneralInfoDto) {
     try {
+      const existing = await this.prisma.generalInfo.findUnique({
+        where: { email: dto.email },
+      });
+
+      if (existing) {
+        return { message: 'Bunday generalInfo mavjud' };
+      }
       return await this.prisma.generalInfo.create({
         data: {
           email: dto.email,

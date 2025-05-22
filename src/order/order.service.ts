@@ -7,10 +7,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PayType, StatusType } from '@prisma/client';
+import { TelegramService } from 'src/bot/bot.service';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly telegramService: TelegramService,
+  ) {}
 
   async create(data: CreateOrderDto, userId: string) {
     const {
@@ -113,18 +117,95 @@ export class OrderService {
           });
         }
       }
+
       await this.prisma.basketItem.deleteMany({
         where: { userId },
       });
-      return await this.prisma.order.findUnique({
+
+      const fullOrder = await this.prisma.order.findUnique({
         where: { id: orderId },
         include: {
           OrderProduct: {
-            include: { OrderProductTool: true },
+            include: {
+              OrderProductTool: true,
+              product: true,
+            },
           },
-          OrderMaster: true,
+          OrderMaster: {
+            include: {
+              master: true,
+            },
+          },
+          user: true,
         },
       });
+      if (!fullOrder) {
+        throw new NotFoundException('Buyurtma topilmadi');
+      }
+      const message = `📦 *Yangi buyurtma!*
+  
+  👤 Buyurtmachi: ${fullOrder.user?.firstName || ''} ${fullOrder.user?.lastName || ''}
+  🧑‍💼 Roli: ${fullOrder.user?.role}
+  📍 Manzil: ${address}
+  🗓 Sana: ${new Date(date).toLocaleString()}
+  💵 To‘lov turi: ${payType}
+  🚚 Yetkazib berish: ${withDelivery ? 'Ha' : 'Yo‘q'}
+  ✏️ Izoh: ${commentToDelivery || '-'}
+  
+  🛒 Mahsulotlar:
+  ${fullOrder.OrderProduct.map(
+    (item, i) =>
+      `${i + 1}) ${item.product?.name_uz || 'Noma’lum'} - ${item.quantity} ${item.measure}`,
+  ).join('\n')}
+  
+  🔧 Ustalar:
+  ${fullOrder.OrderMaster.map(
+    (m, i) => `${i + 1}) ${m.master?.fullName || 'Noma’lum'}`,
+  ).join('\n')}
+  `;
+
+      const admins = await this.prisma.user.findMany({
+        where: {
+          role: {
+            in: ['ADMIN', 'SUPER_ADMIN', 'VIEWER_ADMIN'],
+          },
+          tgId: {
+            not: null,
+          },
+        },
+      });
+      if (fullOrder.user?.tgId) {
+        const userMessage = `✅ Buyurtmangiz muvaffaqiyatli yaratildi!
+        
+      🛒 Mahsulotlar:
+      ${fullOrder.OrderProduct.map(
+        (item, i) =>
+          `${i + 1}) ${item.product?.name_uz || 'Noma’lum'} - ${item.quantity} ${item.measure}`,
+      ).join('\n')}
+      
+      🗓 Sana: ${new Date(fullOrder.date).toLocaleString()}
+      🚚 Yetkazib berish: ${withDelivery ? 'Ha' : 'Yo‘q'}
+      `;
+
+        await this.telegramService.sendMessageToUser(
+          fullOrder.user.tgId,
+          userMessage,
+        );
+      }
+      for (const admin of admins) {
+        await this.telegramService.sendMessageToUser(
+          admin.tgId ?? 'default_id',
+          message,
+        );
+        console.log('Admin tgId:', admin.tgId);
+      }
+      if (fullOrder.user?.tgId) {
+        await this.telegramService.sendMessageToUser(
+          fullOrder.user.tgId,
+          `✅ Buyurtmangiz muvaffaqiyatli qabul qilindi:\n\n${message}`,
+        );
+      }
+      return fullOrder;
     } catch (error) {
       console.error('❌ Error creating order:', error);
 

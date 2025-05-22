@@ -1,42 +1,3 @@
-// import { ApiProperty } from '@nestjs/swagger';
-// import { User, UserRole } from '@prisma/client';
-// import {
-//   IsEmail,
-//   IsEnum,
-//   IsNotEmpty,
-//   IsPhoneNumber,
-//   IsString,
-//   IsUUID,
-// } from 'class-validator';
-
-// export class CreateUserDto {
-//   @ApiProperty({ example: 'Ali' })
-//   @IsString()
-//   firstName: string;
-//   @ApiProperty({ example: 'Valiyev' })
-//   @IsString()
-//   lastName: string;
-//   @ApiProperty()
-//   @IsString()
-//   password: string;
-//   @ApiProperty({ example: 'example@gmail.com' })
-//   @IsEmail()
-//   email: string;
-//   @ApiProperty({ example: '+998931234567' })
-//   @IsPhoneNumber()
-//   phone: string;
-//   @ApiProperty({ enum: UserRole, example: 'USER_FIZ' })
-//   @IsEnum(UserRole)
-//   role: UserRole;
-//   @ApiProperty()
-//   @IsUUID()
-//   @IsNotEmpty()
-//   regionId: string;
-//   //   @ApiProperty({ example: '12365452' })
-//   //   @IsString()
-//   //   tgId: string;
-// }
-
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
@@ -88,10 +49,12 @@ export class CreateUserDto {
   @IsUUID()
   @IsNotEmpty()
   regionId: string;
+  @ApiProperty({ example: '1236545209' })
+  @IsString()
+  tgId: string;
   @IsOptional()
-  @ApiProperty({ type: [CreateUserYurDto] })
-  @IsArray()
-  @ValidateNested({ each: true })
+  @ApiProperty({ type: CreateUserYurDto })
+  @ValidateNested()
   @Type(() => CreateUserYurDto)
-  User_YUR?: CreateUserYurDto[];
+  User_YUR?: CreateUserYurDto;
 }

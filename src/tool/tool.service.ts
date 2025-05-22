@@ -12,6 +12,13 @@ export class ToolService {
   constructor(private readonly prisma: PrismaService) {}
   async create(data: CreateToolDto) {
     try {
+      const existing = await this.prisma.tool.findFirst({
+        where: { name_uz: data.name_uz },
+      });
+
+      if (existing) {
+        return { message: 'Bunday tool mavjud' };
+      }
       await this.checkRelations(data.sizeId, data.brandId, data.capacityId);
 
       const post = await this.prisma.tool.create({ data });
@@ -31,7 +38,6 @@ export class ToolService {
 
       const where: any = {};
 
-      // String qidiruv (contains)
       if (query.name_uz) {
         where.name_uz = { contains: query.name_uz, mode: 'insensitive' };
       }
@@ -63,7 +69,6 @@ export class ToolService {
         where.code = { contains: query.code, mode: 'insensitive' };
       }
 
-      // UUID bo‘yicha aniq moslik
       if (query.brandId) {
         where.brandId = query.brandId;
       }
@@ -74,7 +79,6 @@ export class ToolService {
         where.sizeId = query.sizeId;
       }
 
-      // Boolean
       if (query.isActive !== undefined) {
         where.isActive = query.isActive === 'true';
       }

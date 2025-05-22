@@ -26,10 +26,9 @@ export class CreateAdmin {
   @ApiProperty({ example: 'exaple@gmail.com' })
   @IsEmail()
   email: string;
-  @ApiProperty()
-  @IsUUID()
-  @IsNotEmpty()
-  regionId: string;
+  // @ApiProperty({ example: '1236545209' })
+  // @IsString()
+  // tgId: string;
   @ApiProperty({ example: 'ADMIN' })
   @IsString()
   role: string;

@@ -34,20 +34,24 @@ export class UserService {
     const verified = await this.prisma.verifyEmail.findFirst({
       where: { email: data.email },
     });
+
     if (!verified) {
       throw new BadRequestException('Emailni tasdiqlang');
     }
+
     const existingUser = await this.findUserByEmail(data.email);
     if (existingUser) {
-      throw new ConflictException('User already exists');
+      throw new ConflictException('Foydalanuvchi allaqachon mavjud');
     }
+
     const region = await this.prisma.region.findUnique({
       where: { id: data.regionId },
     });
 
     if (!region) {
-      throw new BadRequestException('Invalid regionId');
+      throw new BadRequestException('Noto‘g‘ri regionId');
     }
+
     const allowedRoles: UserRole[] = [
       UserRole.USER_FIZ,
       UserRole.USER_YUR,
@@ -55,42 +59,43 @@ export class UserService {
     ];
 
     if (!allowedRoles.includes(data.role)) {
-      throw new BadRequestException('Role is not allowed for registration');
+      throw new BadRequestException(
+        'Bu rol bilan ro‘yxatdan o‘tishga ruxsat yo‘q',
+      );
     }
+
     const hash = bcrypt.hashSync(data.password, 10);
+
     const newUser = await this.prisma.user.create({
       data: {
         ...data,
         password: hash,
         User_YUR:
-          data.role === 'USER_YUR' && data.User_YUR
+          data.role === UserRole.USER_YUR && data.User_YUR
             ? {
-                create: data.User_YUR.map((User_YUR) => ({
-                  INN: User_YUR.INN,
-                  R_S: User_YUR.R_S,
-                  Address: User_YUR.Address,
-                  Bank: User_YUR.Bank,
-                  MFO: User_YUR.MFO,
-                })),
+                create: {
+                  INN: data.User_YUR.INN,
+                  R_S: data.User_YUR.R_S,
+                  Address: data.User_YUR.Address,
+                  Bank: data.User_YUR.Bank,
+                  MFO: data.User_YUR.MFO,
+                },
               }
             : undefined,
       },
       include: { User_YUR: true },
     });
 
-    return newUser;
+    return {
+      ...newUser,
+      User_YUR: data.role === UserRole.USER_YUR ? newUser.User_YUR : null,
+    };
   }
+
   async createAdmin(data: CreateAdmin) {
     const existingUser = await this.findUserByEmail(data.email);
     if (existingUser) {
       throw new ConflictException('User already exists');
-    }
-    const region = await this.prisma.region.findUnique({
-      where: { id: data.regionId },
-    });
-
-    if (!region) {
-      throw new BadRequestException('Invalid regionId');
     }
     let hash = bcrypt.hashSync(data.password, 10);
     let dataA = await this.prisma.user.create({
@@ -98,7 +103,7 @@ export class UserService {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        regionId: data.regionId,
+        // tgId: data.tgId,
         phone: data.phone,
         password: hash,
         role: AdminRole.ADMIN,
@@ -182,9 +187,12 @@ export class UserService {
       });
 
       const total = await this.prisma.user.count({ where });
-
+      const formattedUsers = users.map((user) => ({
+        ...user,
+        User_YUR: user.role === 'USER_YUR' ? user.User_YUR : null,
+      }));
       return {
-        data: users,
+        data: formattedUsers,
         total,
         page,
         limit,
@@ -248,13 +256,13 @@ export class UserService {
         User_YUR:
           role === 'USER_YUR' && User_YUR
             ? {
-                create: User_YUR.map((item) => ({
-                  INN: item.INN,
-                  R_S: item.R_S,
-                  Address: item.Address,
-                  Bank: item.Bank,
-                  MFO: item.MFO,
-                })),
+                create: {
+                  INN: User_YUR.INN,
+                  R_S: User_YUR.R_S,
+                  Address: User_YUR.Address,
+                  Bank: User_YUR.Bank,
+                  MFO: User_YUR.MFO,
+                },
               }
             : undefined,
       },
@@ -265,8 +273,51 @@ export class UserService {
   }
 
   async remove(id: string) {
-    return this.prisma.user.delete({ where: { id } });
+    try {
+      await this.prisma.session.deleteMany({ where: { userId: id } });
+
+      await this.prisma.star.deleteMany({ where: { userId: id } });
+
+      await this.prisma.basketItem.deleteMany({ where: { userId: id } });
+
+      const orders = await this.prisma.order.findMany({
+        where: { userId: id },
+        select: { id: true },
+      });
+
+      for (const order of orders) {
+        const orderId = order.id;
+
+        const orderProducts = await this.prisma.orderProduct.findMany({
+          where: { orderId },
+          select: { id: true },
+        });
+
+        for (const op of orderProducts) {
+          await this.prisma.orderProductTool.deleteMany({
+            where: { orderProductId: op.id },
+          });
+        }
+        await this.prisma.orderProduct.deleteMany({ where: { orderId } });
+
+        await this.prisma.orderMaster.deleteMany({ where: { orderId } });
+
+        await this.prisma.order.delete({ where: { id: orderId } });
+      }
+
+      const deletedUser = await this.prisma.user.delete({
+        where: { id },
+      });
+
+      return { message: 'Foydalanuvchi o‘chirildi', deletedUser };
+    } catch (error) {
+      console.error(`❌ Foydalanuvchini o‘chirishda xatolik:`, error);
+      throw new InternalServerErrorException(
+        'Foydalanuvchini o‘chirishda xatolik yuz berdi',
+      );
+    }
   }
+
   async forgotPassword(data: ForgotPasswordDto) {
     const user = await this.findUserByEmail(data.email);
     if (!user) {
