@@ -33,7 +33,7 @@ export class CreateCommentDto {
   @ApiProperty({
     type: () => CreateCommentMasterDto,
     isArray: true,
-    example: [{ masterId: 'masterId-1', star: 0 }],
+    example: [{ masterId: 'masterId', star: 0 }],
   })
   @IsArray()
   @ValidateNested({ each: true })

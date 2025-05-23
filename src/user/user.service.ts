@@ -93,6 +93,11 @@ export class UserService {
   }
 
   async createAdmin(data: CreateAdmin) {
+    if (data.role !== AdminRole.ADMIN) {
+      throw new BadRequestException(
+        'Faqat ADMIN roli bilan SUPER_ADMIN va VIEWER_ADMIN yaratish mumkin',
+      );
+    }
     const verified = await this.prisma.verifyEmail.findFirst({
       where: { email: data.email },
     });
@@ -114,7 +119,7 @@ export class UserService {
         regionId: data.regionId,
         phone: data.phone,
         password: hash,
-        role: AdminRole.ADMIN,
+        role: data.role,
       },
     });
     return data;

@@ -7,17 +7,24 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { LevelService } from './level.service';
 import { CreateLevelDto } from './dto/create-level.dto';
 import { UpdateLevelDto } from './dto/update-level.dto';
 import { ApiQuery } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleD } from 'src/user/decoration/user.decoration';
+import { UserRole } from '@prisma/client';
+import { RoleGuard } from 'src/auth/role.guards';
 
 @Controller('level')
 export class LevelController {
   constructor(private readonly levelService: LevelService) {}
 
   @Post()
+  @RoleD(UserRole.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   create(@Body() createLevelDto: CreateLevelDto) {
     return this.levelService.create(createLevelDto);
   }

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -10,6 +9,11 @@ import {
   IsUUID,
 } from 'class-validator';
 
+export enum AdminRole {
+  ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  VIEWER_ADMIN = 'VIEWER_ADMIN',
+}
 export class CreateAdmin {
   @ApiProperty()
   @IsString()
@@ -32,10 +36,7 @@ export class CreateAdmin {
   @ApiProperty()
   @IsUUID()
   regionId: string;
-  @ApiProperty({ example: 'ADMIN' })
-  @IsString()
-  role: string;
-}
-export enum AdminRole {
-  ADMIN = 'ADMIN',
+  @IsEnum(AdminRole)
+  @ApiProperty({ example: 'ADMIN', enum: [AdminRole.ADMIN] })
+  role: AdminRole;
 }

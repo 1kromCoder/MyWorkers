@@ -28,7 +28,7 @@ export class LocationDto {
 }
 
 export class OrderProductToolDto {
-  @ApiProperty({ example: 'tool-id-1' })
+  @ApiProperty({ example: 'toolId' })
   @IsUUID()
   @IsNotEmpty()
   toolId: string;
@@ -40,12 +40,12 @@ export class OrderProductToolDto {
 }
 
 export class OrderProductDto {
-  @ApiProperty({ example: 'product-id-1' })
+  @ApiProperty({ example: 'productId' })
   @IsUUID()
   @IsNotEmpty()
   productId: string;
 
-  @ApiProperty({ example: 'level-id-1' })
+  @ApiProperty({ example: 'levelId' })
   @IsUUID()
   @IsNotEmpty()
   levelId: string;
@@ -132,7 +132,7 @@ export class CreateOrderDto {
   // @Type(() => OrderToolDto)
   // OrderTool?: OrderToolDto[];
 
-  @ApiProperty({ example: ['master-id-1'] })
+  @ApiProperty({ example: ['masterId'] })
   @IsOptional()
   @IsArray()
   OrderMaster?: string[];

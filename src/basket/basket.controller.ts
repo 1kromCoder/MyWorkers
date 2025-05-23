@@ -15,12 +15,13 @@ import { UpdateBasketDto } from './dto/update-basket.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateBasketItemDto } from './dto/create-basket.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import { MeasureType } from '@prisma/client';
+import { MeasureType, UserRole } from '@prisma/client';
+import { RoleGuard } from 'src/auth/role.guards';
+import { RoleD } from 'src/user/decoration/user.decoration';
 
 @Controller('basket')
 export class BasketController {
   constructor(private readonly basketService: BasketService) {}
-
   @Post()
   @UseGuards(AuthGuard)
   create(@Body() data: CreateBasketItemDto, @Req() req) {
@@ -70,7 +71,8 @@ export class BasketController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
+  @RoleD(UserRole.SUPER_ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   update(
     @Param('id') id: string,
     @Body() updateBasketDto: UpdateBasketDto,
@@ -79,7 +81,8 @@ export class BasketController {
     let userId = req['user-id'];
     return this.basketService.update(id, updateBasketDto, userId);
   }
-
+  @RoleD(UserRole.ADMIN, UserRole.USER_FIZ, UserRole.USER_YUR)
+  @UseGuards(AuthGuard, RoleGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.basketService.remove(id);

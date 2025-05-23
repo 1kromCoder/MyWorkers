@@ -66,6 +66,8 @@ export class UserController {
     return this.userService.refresh(dto);
   }
   @Get()
+  @RoleD(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   @ApiQuery({ name: 'firstName', required: false })
   @ApiQuery({ name: 'lastName', required: false })
   @ApiQuery({ name: 'email', required: false })

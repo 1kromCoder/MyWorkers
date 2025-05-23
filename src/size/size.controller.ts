@@ -7,17 +7,24 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { SizeService } from './size.service';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
 import { ApiQuery } from '@nestjs/swagger';
+import { RoleD } from 'src/user/decoration/user.decoration';
+import { UserRole } from '@prisma/client';
+import { RoleGuard } from 'src/auth/role.guards';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('size')
 export class SizeController {
   constructor(private readonly sizeService: SizeService) {}
 
   @Post()
+  @RoleD(UserRole.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   create(@Body() createSizeDto: CreateSizeDto) {
     return this.sizeService.create(createSizeDto);
   }
@@ -51,11 +58,15 @@ export class SizeController {
   }
 
   @Patch(':id')
+  @RoleD(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   update(@Param('id') id: string, @Body() updateSizeDto: UpdateSizeDto) {
     return this.sizeService.update(id, updateSizeDto);
   }
 
   @Delete(':id')
+  @RoleD(UserRole.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   remove(@Param('id') id: string) {
     return this.sizeService.remove(id);
   }
