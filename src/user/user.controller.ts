@@ -55,8 +55,8 @@ export class UserController {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     return this.userService.login(loginUserDto, req);
   }
-  // @RoleD(UserRole.ADMIN)
-  // @UseGuards(AuthGuard, RoleGuard)
+  @RoleD(UserRole.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   @Post('add-Admin')
   addAdmin(@Body() dto: CreateAdmin) {
     return this.userService.createAdmin(dto);
