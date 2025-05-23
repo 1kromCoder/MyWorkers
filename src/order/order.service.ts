@@ -378,6 +378,40 @@ export class OrderService {
         throw new NotFoundException(`Buyurtma topilmadi: ${id}`);
       }
 
+      const orderProducts = await this.prisma.orderProduct.findMany({
+        where: { orderId: id },
+        select: { id: true },
+      });
+
+      for (const op of orderProducts) {
+        await this.prisma.orderProductTool.deleteMany({
+          where: { orderProductId: op.id },
+        });
+      }
+
+      await this.prisma.orderProduct.deleteMany({
+        where: { orderId: id },
+      });
+
+      await this.prisma.orderMaster.deleteMany({
+        where: { orderId: id },
+      });
+
+      const comments = await this.prisma.comment.findMany({
+        where: { orderId: id },
+        select: { id: true },
+      });
+
+      for (const comment of comments) {
+        await this.prisma.commentMaster.deleteMany({
+          where: { commentId: comment.id },
+        });
+      }
+
+      await this.prisma.comment.deleteMany({
+        where: { orderId: id },
+      });
+
       return await this.prisma.order.delete({ where: { id } });
     } catch (error) {
       console.error('❌ Error deleting order:', error);

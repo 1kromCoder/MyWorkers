@@ -183,7 +183,6 @@ export class ProductService {
         };
       }
 
-
       const products = await this.prisma.product.findMany({
         where,
         orderBy: { [sortBy]: order },
@@ -263,9 +262,28 @@ export class ProductService {
         throw new NotFoundException(`Product with id ${id} not found`);
       }
 
+      await this.prisma.productTool.deleteMany({
+        where: { productId: id },
+      });
+
+      await this.prisma.productLevel.deleteMany({
+        where: { productId: id },
+      });
+
+      await this.prisma.productMaster.deleteMany({
+        where: { productId: id },
+      });
+
+      await this.prisma.orderProduct.deleteMany({
+        where: { productId: id },
+      });
+
       await this.prisma.product.delete({ where: { id } });
 
-      return { message: `Product with id ${id} deleted successfully` };
+      return {
+        message: `Product with id ${id} deleted successfully`,
+        deletedProduct: product,
+      };
     } catch (error) {
       console.error(`❌ Error deleting product with id ${id}`, error);
       throw new InternalServerErrorException('Failed to delete product');

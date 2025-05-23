@@ -93,6 +93,13 @@ export class UserService {
   }
 
   async createAdmin(data: CreateAdmin) {
+    const verified = await this.prisma.verifyEmail.findFirst({
+      where: { email: data.email },
+    });
+
+    if (!verified) {
+      throw new BadRequestException('Emailni tasdiqlang');
+    }
     const existingUser = await this.findUserByEmail(data.email);
     if (existingUser) {
       throw new ConflictException('User already exists');
@@ -103,7 +110,8 @@ export class UserService {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        // tgId: data.tgId,
+        tgId: data.tgId,
+        regionId: data.regionId,
         phone: data.phone,
         password: hash,
         role: AdminRole.ADMIN,
@@ -275,10 +283,11 @@ export class UserService {
   async remove(id: string) {
     try {
       await this.prisma.session.deleteMany({ where: { userId: id } });
-
       await this.prisma.star.deleteMany({ where: { userId: id } });
-
       await this.prisma.basketItem.deleteMany({ where: { userId: id } });
+
+      // user_YUR yozuvlarini oldin o‘chir
+      await this.prisma.user_YUR.deleteMany({ where: { userId: id } });
 
       const orders = await this.prisma.order.findMany({
         where: { userId: id },
@@ -298,10 +307,9 @@ export class UserService {
             where: { orderProductId: op.id },
           });
         }
+
         await this.prisma.orderProduct.deleteMany({ where: { orderId } });
-
         await this.prisma.orderMaster.deleteMany({ where: { orderId } });
-
         await this.prisma.order.delete({ where: { id: orderId } });
       }
 
@@ -316,28 +324,6 @@ export class UserService {
         'Foydalanuvchini o‘chirishda xatolik yuz berdi',
       );
     }
-  }
-
-  async forgotPassword(data: ForgotPasswordDto) {
-    const user = await this.findUserByEmail(data.email);
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    const token = Math.floor(100000 + Math.random() * 900000).toString();
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { resetToken: token },
-    });
-
-    await this.mailer.sendEmail(
-      data.email,
-      'Password Reset Code',
-      `Your password reset code is: ${token}`,
-    );
-
-    return { message: 'Reset token sent to email' };
   }
 
   async resetPassword(data: ResetPasswordDto) {

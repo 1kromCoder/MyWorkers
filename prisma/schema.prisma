@@ -56,7 +56,7 @@ model User {
   phone      String
   role       UserRole
   regionId   String?
-  tgId       String?      @unique
+  tgId       String?
   resetToken String?
   Region     Region?      @relation(fields: [regionId], references: [id])
   createdAt  DateTime     @default(now())
