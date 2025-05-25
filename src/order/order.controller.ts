@@ -66,6 +66,12 @@ export class OrderController {
   findAll(@Query() query: any) {
     return this.orderService.findAll(query);
   }
+  @Get('my-orders')
+  @UseGuards(AuthGuard)
+  async getMyOrders(@Query() query, @Req() req) {
+    let userId = req['user-id'];
+    return this.orderService.findMyOrders(query, userId);
+  }
 
   @Get(':id')
   @RoleD(

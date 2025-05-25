@@ -26,18 +26,28 @@ export class MailService {
     return otp;
   }
 
-  async verifyOtp(email: string, otp: string): Promise<boolean> {
+  async verifyOtp(
+    email: string,
+    otp: string,
+  ): Promise<'success' | 'email_not_found' | 'invalid_otp'> {
     const storedOtp = this.otpStorage.get(email);
-    if (storedOtp === otp) {
-      await this.prisma.verifyEmail.upsert({
-        where: { email },
-        update: {},
-        create: { email },
-      });
-      this.otpStorage.delete(email);
-      return true;
+
+    if (!storedOtp) {
+      return 'email_not_found';
     }
-    return false;
+
+    if (storedOtp !== otp) {
+      return 'invalid_otp';
+    }
+
+    await this.prisma.verifyEmail.upsert({
+      where: { email },
+      update: {},
+      create: { email },
+    });
+
+    this.otpStorage.delete(email);
+    return 'success';
   }
 
   async sendEmail(to: string, subject: string, text: string) {

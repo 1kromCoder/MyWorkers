@@ -299,6 +299,84 @@ export class OrderService {
       );
     }
   }
+  async findMyOrders(
+    query: {
+      status?: StatusType;
+      payType?: PayType;
+      withDelivery?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+      page?: any;
+      limit?: any;
+    },
+    userId: number,
+  ) {
+    try {
+      const {
+        status,
+        payType,
+        withDelivery,
+        dateFrom,
+        dateTo,
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
+        page = 1,
+        limit = 10,
+      } = query;
+
+      const where: any = {
+        userId,
+      };
+
+      if (status) where.status = status;
+      if (payType) where.payType = payType;
+      if (typeof withDelivery !== 'undefined') {
+        where.withDelivery = withDelivery === 'true';
+      }
+
+      if (dateFrom || dateTo) {
+        where.date = {};
+        if (dateFrom) where.date.gte = new Date(dateFrom);
+        if (dateTo) where.date.lte = new Date(dateTo);
+      }
+
+      const pageNumber = parseInt(page, 10) || 1;
+      const limitNumber = parseInt(limit, 10) || 10;
+      const skip = (pageNumber - 1) * limitNumber;
+
+      const data = await this.prisma.order.findMany({
+        where,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        skip,
+        take: limitNumber,
+        include: {
+          OrderProduct: {
+            include: { OrderProductTool: true },
+          },
+          OrderMaster: true,
+        },
+      });
+
+      const total = await this.prisma.order.count({ where });
+
+      return {
+        data,
+        total,
+        page: pageNumber,
+        limit: limitNumber,
+        totalPages: Math.ceil(total / limitNumber),
+      };
+    } catch (error) {
+      console.error('❌ Error fetching my orders:', error);
+      throw new InternalServerErrorException(
+        'Shaxsiy buyurtmalarni olishda xatolik yuz berdi',
+      );
+    }
+  }
 
   async findOne(id: string) {
     try {

@@ -9,13 +9,14 @@ import {
   Req,
   UseGuards,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { MailService } from 'src/mail/mail.service';
-import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify.dto';
 import { Request as ExpressRequest } from 'express';
@@ -41,11 +42,20 @@ export class UserController {
 
   @Post('verify')
   @ApiOperation({ summary: 'Verify OTP' })
+  @ApiResponse({ status: 200, description: 'OTP is correct' })
+  @ApiResponse({ status: 400, description: 'Email not found or Invalid OTP' })
   async verify(@Body() dto: VerifyOtpDto) {
-    const isValid = await this.mailService.verifyOtp(dto.email, dto.otp);
-    if (isValid) return { message: 'OTP is correct' };
-    else return { message: 'Invalid OTP' };
+    const result = await this.mailService.verifyOtp(dto.email, dto.otp);
+
+    if (result === 'success') {
+      return { message: 'OTP is correct' };
+    } else if (result === 'email_not_found') {
+      throw new BadRequestException('Email not found');
+    } else if (result === 'invalid_otp') {
+      throw new BadRequestException('Invalid OTP');
+    }
   }
+
   @Post('register')
   register(@Body() createUserDto: CreateUserDto) {
     return this.userService.register(createUserDto);

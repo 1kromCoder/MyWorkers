@@ -147,6 +147,77 @@ export class CommentService {
       );
     }
   }
+  async myComments(
+    query: {
+      message?: string;
+      orderId?: string;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+      page?: any;
+      limit?: any;
+    },
+    userIdFromToken: string,
+  ) {
+    try {
+      const {
+        message,
+        orderId,
+        sortBy = 'id',
+        sortOrder = 'desc',
+        page = 1,
+        limit = 10,
+      } = query;
+
+      const where: any = {
+        userId: userIdFromToken, // faqat o‘zining kommentlari
+      };
+
+      if (message) {
+        where.message = { contains: message, mode: 'insensitive' };
+      }
+
+      if (orderId) {
+        where.orderId = orderId;
+      }
+
+      const pageNumber = parseInt(page, 10) || 1;
+      const limitNumber = parseInt(limit, 10) || 10;
+      const skip = (pageNumber - 1) * limitNumber;
+
+      const comments = await this.prisma.comment.findMany({
+        where,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        skip,
+        take: limitNumber,
+        include: {
+          user: true,
+          order: true,
+          CommentMaster: {
+            include: {
+              master: true,
+            },
+          },
+        },
+      });
+
+      const total = await this.prisma.comment.count({ where });
+
+      return {
+        data: comments,
+        total,
+        page: pageNumber,
+        limit: limitNumber,
+        totalPages: Math.ceil(total / limitNumber),
+      };
+    } catch (error) {
+      console.error('❌ Error fetching my comments:', error);
+      throw new InternalServerErrorException(
+        'O‘z kommentlaringizni olishda xatolik yuz berdi',
+      );
+    }
+  }
 
   async findOne(id: string) {
     try {

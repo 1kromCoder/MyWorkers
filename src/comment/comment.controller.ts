@@ -14,7 +14,7 @@ import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 
 @Controller('comment')
 export class CommentController {
@@ -42,6 +42,14 @@ export class CommentController {
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   findAll(@Query() query: any) {
     return this.commentService.findAll(query);
+  }
+  @UseGuards(AuthGuard)
+  @Get('my-comments')
+  @ApiOperation({ summary: 'Get my own comments' })
+  @ApiBearerAuth()
+  async myComments(@Query() query: any, @Req() req: any) {
+    const userId = req['user-id'];
+    return this.commentService.myComments(query, userId);
   }
 
   @Get(':id')
