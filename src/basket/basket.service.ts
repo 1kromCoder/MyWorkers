@@ -126,6 +126,74 @@ export class BasketService {
       );
     }
   }
+  async myBaskets(
+    query: {
+      productId?: string;
+      levelId?: string;
+      measure?: MeasureType;
+      toolId?: string;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+      page?: number;
+      limit?: number;
+    },
+    userIdFromToken: string,
+  ) {
+    try {
+      const {
+        productId,
+        levelId,
+        measure,
+        toolId,
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
+        page = 1,
+        limit = 10,
+      } = query;
+
+      const take = Number(limit);
+      const skip = (Number(page) - 1) * take;
+
+      const where: any = {
+        userId: userIdFromToken, 
+      };
+
+      if (productId) where.productId = productId;
+      if (levelId) where.levelId = levelId;
+      if (measure) where.measure = measure;
+      if (toolId) where.toolId = toolId;
+
+      const items = await this.prisma.basketItem.findMany({
+        where,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        skip,
+        take,
+        include: {
+          product: true,
+          level: true,
+          tool: true,
+          user: true,
+        },
+      });
+
+      const totalCount = await this.prisma.basketItem.count({ where });
+
+      return {
+        data: items,
+        total: totalCount,
+        page: Number(page),
+        limit: take,
+        totalPages: Math.ceil(totalCount / take),
+      };
+    } catch (error) {
+      console.error('❌ MyBaskets olishda xatolik:', error);
+      throw new InternalServerErrorException(
+        'O‘zingizga tegishli basket itemlarni olishda xatolik yuz berdi',
+      );
+    }
+  }
 
   async findOne(id: string) {
     try {

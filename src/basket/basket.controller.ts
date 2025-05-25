@@ -14,7 +14,7 @@ import { BasketService } from './basket.service';
 import { UpdateBasketDto } from './dto/update-basket.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateBasketItemDto } from './dto/create-basket.dto';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { MeasureType, UserRole } from '@prisma/client';
 import { RoleGuard } from 'src/auth/role.guards';
 import { RoleD } from 'src/user/decoration/user.decoration';
@@ -63,6 +63,14 @@ export class BasketController {
       page: Number(page),
       limit: Number(limit),
     });
+  }
+  @UseGuards(AuthGuard)
+  @Get('my-baskets')
+  @ApiOperation({ summary: 'Get my own basket items' })
+  @ApiBearerAuth()
+  async myBaskets(@Query() query: any, @Req() req: any) {
+    const userId = req['user-id'];
+    return this.basketService.myBaskets(query, userId);
   }
 
   @Get(':id')

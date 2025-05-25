@@ -32,8 +32,8 @@ export class OrderController {
   @Get()
   @RoleD(
     UserRole.ADMIN,
-    UserRole.USER_FIZ,
-    UserRole.USER_YUR,
+    // UserRole.USER_FIZ,
+    // UserRole.USER_YUR,
     UserRole.VIEWER_ADMIN,
   )
   @UseGuards(AuthGuard, RoleGuard)
