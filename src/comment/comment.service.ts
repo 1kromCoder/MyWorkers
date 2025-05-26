@@ -78,7 +78,7 @@ export class CommentService {
   }
 
   async findAll(query: {
-    message?: string;
+    // message?: string;
     orderId?: string;
     userId?: string;
     sortBy?: string;
@@ -88,7 +88,7 @@ export class CommentService {
   }) {
     try {
       const {
-        message,
+        // message,
         orderId,
         userId,
         sortBy = 'id',
@@ -99,9 +99,9 @@ export class CommentService {
 
       const where: any = {};
 
-      if (message) {
-        where.message = { contains: message, mode: 'insensitive' };
-      }
+      // if (message) {
+      //   where.message = { contains: message, mode: 'insensitive' };
+      // }
       if (orderId) {
         where.orderId = orderId;
       }

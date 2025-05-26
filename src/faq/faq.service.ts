@@ -17,8 +17,8 @@ export class FaqService {
   }
 
   async findAll(query: {
-    question?: string;
-    answer?: string;
+    // question?: string;
+    // answer?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
     page?: any;
@@ -26,8 +26,8 @@ export class FaqService {
   }) {
     try {
       const {
-        question,
-        answer,
+        // question,
+        // answer,
         sortBy = 'createdAt',
         sortOrder = 'desc',
         page = 1,
@@ -35,9 +35,9 @@ export class FaqService {
       } = query;
 
       const where: any = {};
-      if (question)
-        where.question = { contains: question, mode: 'insensitive' };
-      if (answer) where.answer = { contains: answer, mode: 'insensitive' };
+      // if (question)
+      //   where.question = { contains: question, mode: 'insensitive' };
+      // if (answer) where.answer = { contains: answer, mode: 'insensitive' };
 
       const pageNumber = parseInt(page, 10) || 1;
       const limitNumber = parseInt(limit, 10) || 10;

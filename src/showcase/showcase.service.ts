@@ -60,24 +60,24 @@ export class ShowcaseService {
       if (query.name_en) {
         where.name_en = { contains: query.name_en, mode: 'insensitive' };
       }
-      if (query.description_uz) {
-        where.description_uz = {
-          contains: query.description_uz,
-          mode: 'insensitive',
-        };
-      }
-      if (query.description_ru) {
-        where.description_ru = {
-          contains: query.description_ru,
-          mode: 'insensitive',
-        };
-      }
-      if (query.description_en) {
-        where.description_en = {
-          contains: query.description_en,
-          mode: 'insensitive',
-        };
-      }
+      // if (query.description_uz) {
+      //   where.description_uz = {
+      //     contains: query.description_uz,
+      //     mode: 'insensitive',
+      //   };
+      // }
+      // if (query.description_ru) {
+      //   where.description_ru = {
+      //     contains: query.description_ru,
+      //     mode: 'insensitive',
+      //   };
+      // }
+      // if (query.description_en) {
+      //   where.description_en = {
+      //     contains: query.description_en,
+      //     mode: 'insensitive',
+      //   };
+      // }
       if (query.link) {
         where.link = { contains: query.link, mode: 'insensitive' };
       }

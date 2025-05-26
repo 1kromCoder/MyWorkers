@@ -28,7 +28,7 @@ export class CommentController {
   }
 
   @Get()
-  @ApiQuery({ name: 'message', required: false })
+  // @ApiQuery({ name: 'message', required: false })
   @ApiQuery({ name: 'orderId', required: false })
   @ApiQuery({ name: 'userId', required: false })
   @ApiQuery({ name: 'sortBy', required: false, example: 'createdAt' })

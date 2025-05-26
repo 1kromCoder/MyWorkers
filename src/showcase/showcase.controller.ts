@@ -33,9 +33,9 @@ export class ShowcaseController {
   @ApiQuery({ name: 'name_uz', required: false, type: String })
   @ApiQuery({ name: 'name_ru', required: false, type: String })
   @ApiQuery({ name: 'name_en', required: false, type: String })
-  @ApiQuery({ name: 'description_uz', required: false, type: String })
-  @ApiQuery({ name: 'description_ru', required: false, type: String })
-  @ApiQuery({ name: 'description_en', required: false, type: String })
+  // @ApiQuery({ name: 'description_uz', required: false, type: String })
+  // @ApiQuery({ name: 'description_ru', required: false, type: String })
+  // @ApiQuery({ name: 'description_en', required: false, type: String })
   @ApiQuery({ name: 'link', required: false, type: String })
   @ApiQuery({
     name: 'sortBy',

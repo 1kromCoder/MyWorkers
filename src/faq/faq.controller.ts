@@ -30,8 +30,8 @@ export class FaqController {
   }
 
   @Get()
-  @ApiQuery({ name: 'question', required: false })
-  @ApiQuery({ name: 'answer', required: false })
+  // @ApiQuery({ name: 'question', required: false })
+  // @ApiQuery({ name: 'answer', required: false })
   @ApiQuery({ name: 'sortBy', required: false, example: 'createdAt' })
   @ApiQuery({
     name: 'sortOrder',
