@@ -32,13 +32,13 @@ export class MasterController {
   }
 
   @Get()
-  @RoleD(
-    UserRole.ADMIN,
-    UserRole.USER_FIZ,
-    UserRole.USER_YUR,
-    UserRole.VIEWER_ADMIN,
-  )
-  @UseGuards(AuthGuard, RoleGuard)
+  // @RoleD(
+  //   UserRole.ADMIN,
+  //   UserRole.USER_FIZ,
+  //   UserRole.USER_YUR,
+  //   UserRole.VIEWER_ADMIN,
+  // )
+  // @UseGuards(AuthGuard, RoleGuard)
   @ApiQuery({
     name: 'fullName',
     required: false,
@@ -64,13 +64,13 @@ export class MasterController {
     return this.masterService.findAll(query);
   }
   @Get(':id')
-  @RoleD(
-    UserRole.ADMIN,
-    UserRole.USER_FIZ,
-    UserRole.USER_YUR,
-    UserRole.VIEWER_ADMIN,
-  )
-  @UseGuards(AuthGuard, RoleGuard)
+  // @RoleD(
+  //   UserRole.ADMIN,
+  //   UserRole.USER_FIZ,
+  //   UserRole.USER_YUR,
+  //   UserRole.VIEWER_ADMIN,
+  // )
+  // @UseGuards(AuthGuard, RoleGuard)
   findOne(@Param('id') id: string) {
     return this.masterService.findOne(id);
   }
