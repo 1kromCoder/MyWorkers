@@ -7,17 +7,24 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ShowcaseService } from './showcase.service';
 import { CreateShowcaseDto } from './dto/create-showcase.dto';
 import { UpdateShowcaseDto } from './dto/update-showcase.dto';
 import { ApiQuery } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
+import { RoleD } from 'src/user/decoration/user.decoration';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/role.guards';
 
 @Controller('showcase')
 export class ShowcaseController {
   constructor(private readonly showcaseService: ShowcaseService) {}
 
   @Post()
+  @RoleD(UserRole.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   create(@Body() createShowcaseDto: CreateShowcaseDto) {
     return this.showcaseService.create(createShowcaseDto);
   }
@@ -54,6 +61,8 @@ export class ShowcaseController {
   }
 
   @Patch(':id')
+  @RoleD(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   update(
     @Param('id') id: string,
     @Body() updateShowcaseDto: UpdateShowcaseDto,
@@ -62,6 +71,8 @@ export class ShowcaseController {
   }
 
   @Delete(':id')
+  @RoleD(UserRole.ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   remove(@Param('id') id: string) {
     return this.showcaseService.remove(id);
   }
