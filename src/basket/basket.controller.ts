@@ -29,43 +29,43 @@ export class BasketController {
     return this.basketService.create(data, userId);
   }
 
-  @Get()
-  @RoleD(UserRole.ADMIN, UserRole.VIEWER_ADMIN)
-  @UseGuards(AuthGuard, RoleGuard)
-  @ApiQuery({ name: 'productId', required: false })
-  @ApiQuery({ name: 'levelId', required: false })
-  @ApiQuery({ name: 'measure', required: false, enum: MeasureType })
-  @ApiQuery({ name: 'toolId', required: false })
-  @ApiQuery({ name: 'sortBy', required: false, example: 'createdAt' })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    enum: ['asc', 'desc'],
-    example: 'desc',
-  })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 10 })
-  findAll(
-    @Query('productId') productId?: string,
-    @Query('levelId') levelId?: string,
-    @Query('measure') measure?: MeasureType,
-    @Query('toolId') toolId?: string,
-    @Query('sortBy') sortBy: string = 'createdAt',
-    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ) {
-    return this.basketService.findAll({
-      productId,
-      levelId,
-      measure,
-      toolId,
-      sortBy,
-      sortOrder,
-      page: Number(page),
-      limit: Number(limit),
-    });
-  }
+  // @Get()
+  // @RoleD(UserRole.ADMIN, UserRole.VIEWER_ADMIN)
+  // @UseGuards(AuthGuard, RoleGuard)
+  // @ApiQuery({ name: 'productId', required: false })
+  // @ApiQuery({ name: 'levelId', required: false })
+  // @ApiQuery({ name: 'measure', required: false, enum: MeasureType })
+  // @ApiQuery({ name: 'toolId', required: false })
+  // @ApiQuery({ name: 'sortBy', required: false, example: 'createdAt' })
+  // @ApiQuery({
+  //   name: 'sortOrder',
+  //   required: false,
+  //   enum: ['asc', 'desc'],
+  //   example: 'desc',
+  // })
+  // @ApiQuery({ name: 'page', required: false, example: 1 })
+  // @ApiQuery({ name: 'limit', required: false, example: 10 })
+  // findAll(
+  //   @Query('productId') productId?: string,
+  //   @Query('levelId') levelId?: string,
+  //   @Query('measure') measure?: MeasureType,
+  //   @Query('toolId') toolId?: string,
+  //   @Query('sortBy') sortBy: string = 'createdAt',
+  //   @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc',
+  //   @Query('page') page: number = 1,
+  //   @Query('limit') limit: number = 10,
+  // ) {
+  //   return this.basketService.findAll({
+  //     productId,
+  //     levelId,
+  //     measure,
+  //     toolId,
+  //     sortBy,
+  //     sortOrder,
+  //     page: Number(page),
+  //     limit: Number(limit),
+  //   });
+  // }
   @UseGuards(AuthGuard)
   @Get('my-baskets')
   @ApiOperation({ summary: 'Get my own basket items' })

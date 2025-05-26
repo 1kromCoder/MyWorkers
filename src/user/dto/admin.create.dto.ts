@@ -25,6 +25,7 @@ export class CreateAdmin {
   @IsPhoneNumber()
   phone: string;
   @ApiProperty()
+  @IsNotEmpty()
   @IsString()
   password: string;
   @ApiProperty({ example: 'exaple@gmail.com' })

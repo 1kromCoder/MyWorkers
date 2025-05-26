@@ -23,8 +23,6 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post()
-  @RoleD(UserRole.ADMIN)
-  @UseGuards(AuthGuard, RoleGuard)
   create(@Body() createContactDto: CreateContactDto) {
     return this.contactService.create(createContactDto);
   }
@@ -53,15 +51,11 @@ export class ContactController {
   }
 
   @Patch(':id')
-  @RoleD(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  @UseGuards(AuthGuard, RoleGuard)
   update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
     return this.contactService.update(id, updateContactDto);
   }
 
   @Delete(':id')
-  @RoleD(UserRole.ADMIN)
-  @UseGuards(AuthGuard, RoleGuard)
   remove(@Param('id') id: string) {
     return this.contactService.remove(id);
   }
