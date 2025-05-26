@@ -30,6 +30,8 @@ export class BasketController {
   }
 
   @Get()
+  @RoleD(UserRole.ADMIN, UserRole.VIEWER_ADMIN)
+  @UseGuards(AuthGuard, RoleGuard)
   @ApiQuery({ name: 'productId', required: false })
   @ApiQuery({ name: 'levelId', required: false })
   @ApiQuery({ name: 'measure', required: false, enum: MeasureType })
