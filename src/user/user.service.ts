@@ -200,10 +200,13 @@ export class UserService {
       });
 
       const total = await this.prisma.user.count({ where });
-      const formattedUsers = users.map((user) => ({
-        ...user,
-        User_YUR: user.role === 'USER_YUR' ? user.User_YUR : null,
-      }));
+      const formattedUsers = users.map((user) => {
+        const { password, ...rest } = user;
+        return {
+          ...rest,
+          User_YUR: user.role === 'USER_YUR' ? user.User_YUR : null,
+        };
+      });
       return {
         data: formattedUsers,
         total,
