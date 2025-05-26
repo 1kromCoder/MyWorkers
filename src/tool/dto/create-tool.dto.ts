@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   IsUUID,
@@ -43,10 +44,11 @@ export class CreateToolDto {
   @IsBoolean()
   isActive: boolean;
   @ApiProperty()
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
   brandId: string;
   @ApiProperty()
+  @IsOptional()
   @IsUUID()
   @IsNotEmpty()
   capacityId: string;

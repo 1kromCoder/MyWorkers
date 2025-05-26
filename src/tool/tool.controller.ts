@@ -30,13 +30,6 @@ export class ToolController {
   }
 
   @Get()
-  @RoleD(
-    UserRole.ADMIN,
-    UserRole.USER_FIZ,
-    UserRole.USER_YUR,
-    UserRole.VIEWER_ADMIN,
-  )
-  @UseGuards(AuthGuard, RoleGuard)
   @ApiQuery({ name: 'name_uz', required: false, type: String })
   @ApiQuery({ name: 'name_ru', required: false, type: String })
   @ApiQuery({ name: 'name_en', required: false, type: String })
